@@ -4,6 +4,8 @@
 
 Kısaltmalar : GA (Genetik Algoritma)
 
+**Bu makale, Ömer Faruk CAN'ın 2016 yılına ait Bilgisayar Mühendisliği Bitirme Tezine ait bir bölümdür **
+
 **NOT**:*Buradaki bilgilerden yararlanılarak evolution.js kütüphanesi yazıldı.*
 
 ## Tanımlar
@@ -33,9 +35,9 @@ Bu algoritmalar ilk kez  1975 yılında John Holland'ın “Adaptation in Natura
 1. P(0) başlangıç populasyonunu oluştur. (t=0)
 2. P(t)'yi değerlendir
 3. Durdurma kriterini kontrol et.
-3. P(t)'nin bireylerini seç.
-4. P(t)'nin seçilmiş bireylerini değiştirerek P(t+1) populasyonunu oluştur. (t=t+1)
-5. Adım 2'ye geç.
+4. P(t)'nin bireylerini seç.
+5. P(t)'nin seçilmiş bireylerini değiştirerek P(t+1) populasyonunu oluştur. (t=t+1)
+6. Adım 2'ye geç.
 
 
 [Kaynakça;3]
@@ -43,10 +45,13 @@ Bu algoritmalar ilk kez  1975 yılında John Holland'ın “Adaptation in Natura
 ### GA (Genetik Algoritma)
 Genetik algoritma hakkında bilgilerin saklandığı objedir.
 
-
 |	değişken	|	açıklama				|
 |	--------	|	--------				|
-|	defaultParameters{}	|	Her Evolotion sınıfın varsayılan parametreleridir	|
+
+| defaultParameters{} | Her Evolution sınıfın varsayılan parametreleridir |
+| ------------------- | ---------------------------------------- |
+|                     |                                          |
+
 |	charSet[]	|	Bir String'de kullanılabilecek karakterlerin listesidir	|
 |	TYPE{}	|	Gen türlerin saklandığı ENUM BIT,INT,UNIPOLAR,BIPOLAR,STRING,CHROMOSOME	|
 |	CO_TYPE{}	|	Çaprazlama yönteminin saklandığı ENUM PARTIALY,MULTIPARTIALY,UNIFORM	|
@@ -82,7 +87,7 @@ Genetik algoritma hakkında bilgilerin saklandığı objedir.
 |	crossingOverRULED(chromA,chromoB,CO_TYPE,PARTNUM_OR_UNIFORMRATE)	|	İki kromozomu çaprazlar ve çaprazlama sonucu oluşan kromozomlardaki hataları onarır.(mutasyon sonrasıda aynı işlem yapıldığı için crossingOver fonksiyonu tercih edilir)	|
 
 
-### Evolotion (Evrim)
+### Evolution (Evrim)
 Altında populasyonları bulunduran. En üst sınıftır.
 
 
@@ -108,7 +113,7 @@ Member'ların dizisidir. Population'un fitness fonksiyonu ve Memberların en iyi
 |	değişken	|	açıklama				|
 |	--------	|	--------				|
 |	members[]	|	Population'un üyelerinin	|
-|	evolotion	|	Evolution üst sınıfı	|
+|	evolution	|	Evolution üst sınıfı	|
 |	bestMember	|	En yüksek fitness değerine sahip üyedir	|
 |	avgFitness	|	Ortalama fitness değeri	|
 |	minFitness	|	Minimum fitness değeri	|
@@ -257,7 +262,7 @@ Evrimsel algoritma, adım adım olarak değil, asenkron şekilde çalışır. Ya
 
 ![alt tag](https://upload.wikimedia.org/wikipedia/tr/5/59/GAelen.jpg)
 
-## "Her ölüm bir yeniden doğumdur " Gerçek Zamanlı Algoritması
+## "Reenkarnasyon " Gerçek Zamanlı Algoritması
 1. Rastgele başlangıç populasyonu üret
 2. Bir üyenin ölmesini bekle => 3.Adıma geç, ve Sonlanmayı bekle => 10.adıma geç
 3. Populasyonu değerlendir
