@@ -47,11 +47,7 @@ Genetik algoritma hakkında bilgilerin saklandığı objedir.
 
 |	değişken	|	açıklama				|
 |	--------	|	--------				|
-
 | defaultParameters{} | Her Evolution sınıfın varsayılan parametreleridir |
-| ------------------- | ---------------------------------------- |
-|                     |                                          |
-
 |	charSet[]	|	Bir String'de kullanılabilecek karakterlerin listesidir	|
 |	TYPE{}	|	Gen türlerin saklandığı ENUM BIT,INT,UNIPOLAR,BIPOLAR,STRING,CHROMOSOME	|
 |	CO_TYPE{}	|	Çaprazlama yönteminin saklandığı ENUM PARTIALY,MULTIPARTIALY,UNIFORM	|
