@@ -53,7 +53,7 @@ var GA = {
     },
     ALGORITHMS : {
         STANDART : 0,
-        DIEANDBORN : 1
+        REINCARNATION : 1
     },
     random : function(){ return Math.random(); },
     randomINT : function(min,max) { return Math.round(Math.random()*(max-min) + min)},
@@ -285,7 +285,7 @@ Evolution.prototype = {
                 }
                 break;
 
-            case GA.ALGORITHMS.DIEANDBORN:
+            case GA.ALGORITHMS.REINCARNATION:
                 this.onNewMember = function(member){
                    this.bornFunction(member);
                     member.kill = function(){
