@@ -4,6 +4,7 @@
 
 //	#	by Faruk CAN ( farukcan.net ) @ 2016
 //	#	license : GNU GPL
+//  #   https://github.com/farukcan/evolution.js
 /*
 
 GA : object
@@ -753,23 +754,23 @@ Gene.prototype = {
 
 
 function GenePart(way,root){
-    this.parrents = way;
+    this.parents = way;
     this.root = root;
 }
 
 GenePart.prototype = {
     getGene : function(from){
         var current = typeof from != 'undefined' ? from : this.root;
-        this.parrents.forEach(function(child){
+        this.parents.forEach(function(child){
             current = current.val[child];
         });
         return current;
     },
     isSameWith : function(genepart){
-        if(this.parrents.length!=genepart.parrents.length) return false;
+        if(this.parents.length!=genepart.parents.length) return false;
 
-        for(var i = 0 ; i < this.parrents.length ; i++)
-            if(this.parrents[i]!=genepart.parrents[i])
+        for(var i = 0 ; i < this.parents.length ; i++)
+            if(this.parents[i]!=genepart.parents[i])
                 return false;
 
         return true;
