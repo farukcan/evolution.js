@@ -53,7 +53,8 @@ var GA = {
     },
     ALGORITHMS : {
         STANDART : 0,
-        REINCARNATION : 1
+        REINCARNATION : 1,
+        STEPBYSTEP : 2
     },
     random : function(){ return Math.random(); },
     randomINT : function(min,max) { return Math.round(Math.random()*(max-min) + min)},
@@ -261,27 +262,33 @@ Evolution.prototype = {
         }
         return this;
     },
+    step : function(){
+        GA.log('iteration: '+this.iteration)
+        GA.log("avg fitness:"+this.population.avgFitness)
+        GA.log("max fitness:"+this.population.maxFitness)
+        GA.log("mem"+this.population.members.length)
+        GA.log('select')
+        this.population.selection();
+        GA.log('cross')
+        this.population.crossing_over();
+        GA.log('mutate')
+        this.population.mutation();
+        this.population.calcFitness();
+        this.iteration++;
+    },
     start : function(){
         switch (this.parameters.algorithm){
+            case GA.ALGORITHMS.STEPBYSTEP:
+                this.createPopulation(this.parameters.population_size);
+                this.population.calcFitness();
+                this.iteration=0;
+                break;
             case GA.ALGORITHMS.STANDART:
                 this.createPopulation(this.parameters.population_size);
                 this.population.calcFitness();
-                var iteration=0;
+                this.iteration=0;
                 while(iteration<this.parameters.iterations){
-                    GA.log('iteration: '+iteration)
-                    GA.log("avg fitness:"+this.population.avgFitness)
-                    GA.log("max fitness:"+this.population.maxFitness)
-                    GA.log("mem"+this.population.members.length)
-                    GA.log('select')
-                    this.population.selection();
-                    GA.log('cross')
-                    this.population.crossing_over();
-                    GA.log('mutate')
-                    this.population.mutation();
-
-                    this.population.calcFitness();
-
-                    iteration++;
+                    this.step();
                 }
                 break;
 
