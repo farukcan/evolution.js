@@ -1,23 +1,26 @@
 #!/usr/bin/env node
 /**
  * Generates README visuals for evolution.js (no npm dependencies).
+ * code.png uses Roboto Mono via Python Pillow (pip install pillow).
  *
  * Usage: node generate-visuals.mjs
  *
  * Outputs:
  *   media/logo.png          — library logo
  *   media/demo-fitness.png  — string-evolution fitness chart
- *   media/code.png          — macOS code editor screenshot
+ *   media/code.png          — macOS code editor screenshot (Roboto Mono)
  */
 
 import { mkdirSync, writeFileSync, readFileSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 import { deflateSync } from "node:zlib";
+import { execFileSync } from "node:child_process";
 import vm from "node:vm";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const MEDIA_DIR = join(__dirname, "media");
+const FONT_ROBOTO_MONO = join(MEDIA_DIR, "fonts", "RobotoMono-Regular.ttf");
 const TARGET = "Hello";
 const ITERATIONS = 80;
 const POPULATION_SIZE = 80;
@@ -412,6 +415,9 @@ function runStringDemo({ GA, Evolution, Population, Member, Gene }) {
   // Deterministic demo for stable README images
   const rng = mulberry32(0xe701);
   GA.random = rng;
+  GA.randomINT = function (min, max) {
+    return Math.round(rng() * (max - min) + min);
+  };
   // Narrow charset so the demo converges in reasonable iterations
   GA.charSet = "Helo WrdabcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ .";
 
@@ -566,21 +572,21 @@ function generateFitnessChart(history, bestString) {
 }
 
 // ---------------------------------------------------------------------------
-// macOS code editor screenshot
+// macOS code editor screenshot (Roboto Mono via Pillow)
 // ---------------------------------------------------------------------------
 
 const SYNTAX = {
-  comment: [106, 153, 85],
-  keyword: [197, 134, 192],
-  string: [206, 145, 120],
-  number: [181, 206, 168],
-  function: [220, 220, 170],
-  className: [78, 201, 176],
-  property: [156, 220, 254],
-  plain: [212, 212, 212],
-  punct: [212, 212, 212],
-  operator: [212, 212, 212],
-  lineNo: [110, 118, 129],
+  comment: "#6A9955",
+  keyword: "#C586C0",
+  string: "#CE9178",
+  number: "#B5CEA8",
+  function: "#DCDCAA",
+  className: "#4EC9B0",
+  property: "#9CDCFE",
+  plain: "#D4D4D4",
+  punct: "#D4D4D4",
+  operator: "#D4D4D4",
+  lineNo: "#6E7681",
 };
 
 const KW = new Set([
@@ -654,6 +660,92 @@ function tokenizeJsLine(line) {
   return tokens;
 }
 
+const CODE_RENDER_PY = `
+import json, sys
+from PIL import Image, ImageDraw, ImageFont
+
+data = json.load(sys.stdin)
+font_path = data["fontPath"]
+source = data["source"]
+colors = data["colors"]
+tokenized = data["tokenized"]
+
+font = ImageFont.truetype(font_path, 15)
+font_ui = ImageFont.truetype(font_path, 13)
+font_status = ImageFont.truetype(font_path, 12)
+
+sample = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
+bbox = font.getbbox(sample)
+char_w = (bbox[2] - bbox[0]) / len(sample)
+line_h = 22
+gutter_w = 52
+pad_l = 20
+title_h = 42
+status_h = 24
+pad_r = 28
+max_cols = max((len(l) for l in source), default=40)
+
+win_w = int(pad_l + gutter_w + max_cols * char_w + pad_r)
+win_h = int(title_h + 16 + len(source) * line_h + status_h + 16)
+
+margin = 24
+W = win_w + margin * 2
+H = win_h + margin * 2
+
+img = Image.new("RGBA", (W, H), (42, 52, 58, 255))
+draw = ImageDraw.Draw(img)
+
+for i in range(5):
+    draw.rectangle(
+        [8 + i * 6, 8 + i * 5, W - 8 - i * 6, H - 8 - i * 5],
+        fill=(55, 70, 78, 28),
+    )
+
+ox, oy = margin, margin
+
+draw.rounded_rectangle([ox + 5, oy + 7, ox + win_w + 5, oy + win_h + 7], radius=10, fill=(0, 0, 0, 55))
+draw.rounded_rectangle([ox, oy, ox + win_w, oy + win_h], radius=10, fill=(30, 30, 30, 255))
+draw.rounded_rectangle([ox, oy, ox + win_w, oy + title_h + 8], radius=10, fill=(45, 45, 48, 255))
+draw.rectangle([ox, oy + 18, ox + win_w, oy + title_h], fill=(45, 45, 48, 255))
+draw.line([(ox, oy + title_h), (ox + win_w, oy + title_h)], fill=(60, 60, 64, 255), width=1)
+
+for i, rgb in enumerate([(255, 95, 86), (255, 189, 46), (39, 201, 63)]):
+    cx = ox + 22 + i * 20
+    cy = oy + title_h // 2
+    draw.ellipse([cx - 7, cy - 7, cx + 7, cy + 7], fill=rgb)
+    draw.ellipse([cx - 4, cy - 5, cx - 1, cy - 2], fill=(255, 255, 255, 70))
+
+file_name = "example.js"
+fb = font_ui.getbbox(file_name)
+fw = fb[2] - fb[0]
+fh = fb[3] - fb[1]
+fx = ox + (win_w - fw) // 2
+fy = oy + (title_h - fh) // 2 - 2
+draw.rounded_rectangle([fx - 12, fy - 4, fx + fw + 12, fy + fh + 4], radius=6, fill=(58, 58, 62, 255))
+draw.text((fx, fy), file_name, font=font_ui, fill=(200, 200, 205, 255))
+
+draw.rectangle([ox, oy + title_h, ox + win_w, oy + win_h - status_h], fill=(30, 30, 30, 255))
+draw.rectangle([ox, oy + title_h, ox + pad_l + gutter_w - 10, oy + win_h - status_h], fill=(35, 35, 38, 255))
+
+y0 = oy + title_h + 14
+for idx, line in enumerate(source):
+    y = y0 + idx * line_h
+    draw.text((ox + pad_l, y), f"{idx + 1:2d}", font=font, fill=colors["lineNo"])
+    x = ox + pad_l + gutter_w
+    for tok in tokenized[idx]:
+        color = colors.get(tok["type"], colors["plain"])
+        draw.text((x, y), tok["text"], font=font, fill=color)
+        x += font.getlength(tok["text"])
+
+draw.rectangle([ox, oy + win_h - status_h, ox + win_w, oy + win_h], fill=(40, 40, 44, 255))
+draw.rounded_rectangle([ox, oy + win_h - status_h - 8, ox + win_w, oy + win_h], radius=10, fill=(40, 40, 44, 255))
+draw.rectangle([ox, oy + win_h - status_h - 8, ox + win_w, oy + win_h - 10], fill=(40, 40, 44, 255))
+status = f"JavaScript    UTF-8    Ln {len(source)}"
+draw.text((ox + 14, oy + win_h - status_h + 5), status, font=font_status, fill=(140, 145, 150, 255))
+
+img.convert("RGB").save(sys.stdout.buffer, format="PNG", optimize=True)
+`;
+
 function generateCodePng() {
   const source = [
     "// evolution.js - string evolution demo",
@@ -687,80 +779,16 @@ function generateCodePng() {
     "evo.start();",
   ];
 
-  const scale = 2;
-  const lineH = 7 * scale + 8;
-  const gutterW = 54;
-  const padL = 18;
-  const padT = 56;
-  const padR = 28;
-  const padB = 28;
-  const maxCols = Math.max(...source.map((l) => l.length), 40);
-  const W = padL + gutterW + maxCols * 6 * scale + padR;
-  const H = padT + source.length * lineH + padB;
-
-  // Desktop wallpaper behind the window
-  const c = createCanvas(W + 48, H + 48, [42, 52, 58, 255]);
-  for (let i = 0; i < 5; i++) {
-    c.fillRect(12 + i * 8, 12 + i * 6, W + 24 - i * 16, H + 24 - i * 12, 55, 70, 78, 30);
-  }
-
-  const ox = 24;
-  const oy = 24;
-
-  // Window shadow
-  c.fillRect(ox + 6, oy + 8, W, H, 0, 0, 0, 50);
-
-  // Window body
-  c.fillRect(ox, oy, W, H, 30, 30, 30, 255);
-
-  // Title bar
-  c.fillRect(ox, oy, W, 40, 45, 45, 48, 255);
-  c.line(ox, oy + 40, ox + W, oy + 40, 60, 60, 64, 255, 1);
-
-  // Traffic lights
-  const lights = [
-    [255, 95, 86],
-    [255, 189, 46],
-    [39, 201, 63],
-  ];
-  lights.forEach((rgb, i) => {
-    const lx = ox + 18 + i * 20;
-    const ly = oy + 20;
-    c.circle(lx, ly, 7, rgb[0], rgb[1], rgb[2], 255, true);
-    c.circle(lx - 1.5, ly - 1.5, 2, 255, 255, 255, 70, true);
+  const tokenized = source.map((line) => tokenizeJsLine(line));
+  return execFileSync("python3", ["-c", CODE_RENDER_PY], {
+    input: JSON.stringify({
+      fontPath: FONT_ROBOTO_MONO,
+      source,
+      tokenized,
+      colors: SYNTAX,
+    }),
+    maxBuffer: 20 * 1024 * 1024,
   });
-
-  // Filename pill
-  const fileName = "example.js";
-  const fw = textWidth(fileName, 2);
-  const fx = ox + (W - fw) / 2;
-  c.fillRect(fx - 14, oy + 10, fw + 28, 20, 58, 58, 62, 255);
-  drawText(c, fileName, fx, oy + 13, 200, 200, 205, 255, 2);
-
-  // Editor background
-  c.fillRect(ox, oy + 40, W, H - 40, 30, 30, 30, 255);
-
-  // Soft left gutter
-  c.fillRect(ox, oy + 40, padL + gutterW - 8, H - 40, 35, 35, 38, 255);
-
-  source.forEach((line, idx) => {
-    const y = oy + padT + idx * lineH;
-    const lineNo = String(idx + 1).padStart(2, " ");
-    drawText(c, lineNo, ox + padL, y, ...SYNTAX.lineNo, 255, scale);
-
-    let x = ox + padL + gutterW;
-    const tokens = tokenizeJsLine(line);
-    for (const tok of tokens) {
-      const color = SYNTAX[tok.type] || SYNTAX.plain;
-      x = drawText(c, tok.text, x, y, color[0], color[1], color[2], 255, scale);
-    }
-  });
-
-  // Subtle bottom status bar
-  c.fillRect(ox, oy + H - 22, W, 22, 40, 40, 44, 255);
-  drawText(c, "JavaScript  UTF-8  Ln 29", ox + 14, oy + H - 17, 140, 145, 150, 255, 2);
-
-  return c.toPng();
 }
 
 // ---------------------------------------------------------------------------

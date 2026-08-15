@@ -14,9 +14,10 @@ Example usage in a code editor:
 
 ![Example code](media/code.png)
 
-Regenerate README images (no npm install required):
+Regenerate README images:
 
 ```bash
+# code.png needs: pip install pillow
 node generate-visuals.mjs
 ```
 
