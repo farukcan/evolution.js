@@ -1,3 +1,27 @@
+# evolution.js
+
+Genetic Evolutionary Algorithm Library for Javascript
+
+![evolution.js logo](media/logo.png)
+
+## Demo
+
+A step-by-step run evolves the string `Hello`. Fitness rises over generations:
+
+![String evolution fitness chart](media/demo-fitness.png)
+
+Example usage in a code editor:
+
+![Example code](media/code.png)
+
+Regenerate README images (no npm install required):
+
+```bash
+node generate-visuals.mjs
+```
+
+---
+
 # Genetic Algorithm
 
 [TOC]
